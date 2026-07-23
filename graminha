@@ -1,0 +1,944 @@
+<p>&nbsp;</p>
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ====================================================================
+  TEMA BLOGGER — LOJA DE AFILIADOS
+  ====================================================================
+ <span style="font-size:32px;">🌿🐾<span>
+<span style="font-size:30px;font-weight:bold;color:#2E7D32;font-family:Poppins,sans-serif;">
+Grama Pet
+</span> 
+Como instalar:
+  1. No painel do Blogger, vá em "Tema" > seta ao lado de "Personalizar"
+     > "Editar HTML".
+  2. Selecione TODO o conteúdo existente e apague.
+  3. Cole todo o conteúdo deste arquivo e clique em "Salvar".
+  4. Volte ao topo deste arquivo e ajuste a seção CONFIGURAÇÕES
+     (procure por "CONFIGURAÇÕES" com Ctrl+F) com o nome da loja,
+     WhatsApp, redes sociais e categorias.
+  5. Para cada produto, crie uma nova postagem e cole o conteúdo do
+     arquivo "modelo-produto.html" na aba HTML do editor de postagens.
+
+  Estrutura deste arquivo:
+  - <b:skin>            -> todo o CSS (com variáveis de cor no topo)
+  - CONFIGURAÇÕES (JS)  -> nome da loja, whatsapp, redes, categorias
+  - Cabeçalho           -> logo, menu, busca, botão WhatsApp
+  - Banner              -> só aparece na home
+  - Seções da Home      -> destaques, lançamentos, mais vendidos, promoções
+  - Página de Produto   -> breadcrumb + corpo da postagem + relacionados
+  - Rodapé              -> redes sociais, categorias, sobre
+  - <script>            -> toda a lógica em JS puro, comentada
+  ====================================================================
+-->
+<html b:version='2' class='v2' expr:dir='data:blog.languageDirection' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<head>
+  <meta charset='UTF-8'/>
+  <meta content='width=device-width, initial-scale=1' name='viewport'/>
+  <meta content='IE=edge' http-equiv='X-UA-Compatible'/>
+
+  <!-- SEO básico -->
+  <title><b:if cond='data:blog.pageType == &quot;item&quot;'><data:blog.pageName/> | <data:blog.title/><b:else/><data:blog.pageTitle/></b:if></title>
+  <b:if cond='data:blog.metaDescription'>
+    <meta expr:content='data:blog.metaDescription' name='description'/>
+  <b:else/>
+    <meta content='Loja de ofertas e recomendações de produtos selecionados. Aproveite descontos, avaliações e frete facilitado.' name='description'/>
+  </b:if>
+  <link expr:href='data:blog.canonicalUrl' rel='canonical'/>
+
+  <!-- Open Graph -->
+  <meta expr:content='data:blog.pageName ? data:blog.pageName : data:blog.title' property='og:title'/>
+  <meta expr:content='data:blog.canonicalUrl' property='og:url'/>
+  <meta content='website' property='og:type'/>
+  <meta expr:content='data:blog.title' property='og:site_name'/>
+
+  <b:include data='blog' name='all-head-content'/>
+
+  <!-- Tipografia: Poppins para títulos, Inter para texto. Remova este link se preferir só fontes do sistema. -->
+  <link href='https://fonts.googleapis.com' rel='preconnect'/>
+  <link href='https://fonts.gstatic.com' crossorigin='anonymous' rel='preconnect'/>
+  <link href='https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap' rel='stylesheet'/>
+
+  <b:skin><![CDATA[
+
+/* ==================================================================
+   CONFIGURAÇÕES DE CORES — altere só estas variáveis para trocar
+   a identidade visual de toda a loja de uma vez.
+   ================================================================== */
+:root{
+  --cor-primaria:#2E7D32;        /* verde principal */
+  --cor-primaria-escura:#1B5E20; /* verde para hover/detalhes */
+  --cor-primaria-clara:#E8F5E9;  /* verde bem claro, para fundos */
+  --cor-dourada:#C9A227;         /* dourado para selos e detalhes premium */
+  --cor-dourada-clara:#F4E9C9;
+  --cor-fundo:#F6F7F6;           /* cinza claro de fundo */
+  --cor-cartao:#FFFFFF;
+  --cor-texto:#1B1F1C;
+  --cor-texto-suave:#5B655D;
+  --cor-borda:#E5E8E5;
+  --cor-preco-antigo:#9AA39B;
+  --cor-alerta:#D64545;
+
+  --fonte-titulo:'Poppins', 'Segoe UI', sans-serif;
+  --fonte-texto:'Inter', 'Segoe UI', sans-serif;
+
+  --raio:14px;
+  --raio-pequeno:8px;
+  --sombra:0 4px 18px rgba(27,31,29,.07);
+  --sombra-forte:0 10px 30px rgba(27,31,29,.14);
+  --transicao:.25s ease;
+}
+
+/* ============ RESET E BASE ============ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--fonte-texto);
+  color:var(--cor-texto);
+  background:var(--cor-fundo);
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+ul{list-style:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+input{font-family:inherit}
+h1,h2,h3,h4{font-family:var(--fonte-titulo);line-height:1.25}
+.wrap{max-width:1240px;margin:0 auto;padding:0 20px}
+.somente-leitor-tela{position:absolute;left:-9999px}
+
+/* ============ CABEÇALHO ============ */
+.cabecalho{
+  position:sticky;top:0;z-index:100;
+  background:var(--cor-cartao);
+  border-bottom:1px solid var(--cor-borda);
+  transition:box-shadow var(--transicao);
+}
+.cabecalho.com-sombra{box-shadow:var(--sombra)}
+.cabecalho__linha{
+  display:flex;align-items:center;gap:24px;
+  padding:14px 20px;max-width:1240px;margin:0 auto;
+}
+.cabecalho__marca{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.cabecalho__logo{width:42px;height:42px;border-radius:var(--raio-pequeno);object-fit:cover}
+.cabecalho__nome{font-family:var(--fonte-titulo);font-weight:700;font-size:1.25rem;color:var(--cor-primaria-escura)}
+.cabecalho__menu{display:flex;gap:22px;flex:1}
+.cabecalho__menu a{
+  font-weight:600;font-size:.94rem;color:var(--cor-texto);
+  padding:8px 2px;position:relative;transition:color var(--transicao);
+}
+.cabecalho__menu a::after{
+  content:'';position:absolute;left:0;bottom:0;width:0;height:2px;
+  background:var(--cor-primaria);transition:width var(--transicao);
+}
+.cabecalho__menu a:hover{color:var(--cor-primaria)}
+.cabecalho__menu a:hover::after{width:100%}
+.cabecalho__busca{
+  display:flex;align-items:center;flex:1;max-width:340px;
+  background:var(--cor-fundo);border:1px solid var(--cor-borda);
+  border-radius:999px;padding:6px 6px 6px 16px;
+}
+.cabecalho__busca input{flex:1;background:transparent;border:0;outline:0;font-size:.9rem}
+.cabecalho__busca button{
+  width:32px;height:32px;border-radius:50%;background:var(--cor-primaria);
+  color:#fff;display:grid;place-items:center;flex-shrink:0;transition:background var(--transicao);
+}
+.cabecalho__busca button:hover{background:var(--cor-primaria-escura)}
+.cabecalho__acoes{display:flex;align-items:center;gap:14px;flex-shrink:0}
+.botao-whatsapp-topo{
+  display:flex;align-items:center;gap:8px;background:#25D366;color:#fff;
+  padding:9px 16px;border-radius:999px;font-weight:600;font-size:.86rem;
+  transition:transform var(--transicao),box-shadow var(--transicao);
+}
+.botao-whatsapp-topo:hover{transform:translateY(-2px);box-shadow:var(--sombra)}
+.cabecalho__menu-mobile-botao{display:none;background:none}
+.cabecalho__menu-mobile-botao span,.cabecalho__menu-mobile-botao span::before,.cabecalho__menu-mobile-botao span::after{
+  content:'';display:block;width:24px;height:2px;background:var(--cor-texto);position:relative;transition:var(--transicao)
+}
+.cabecalho__menu-mobile-botao span::before{position:absolute;top:-7px}
+.cabecalho__menu-mobile-botao span::after{position:absolute;top:7px}
+
+/* Botão flutuante de WhatsApp (mobile e desktop) */
+.whatsapp-flutuante{
+  position:fixed;right:20px;bottom:20px;z-index:200;
+  width:58px;height:58px;border-radius:50%;background:#25D366;
+  display:grid;place-items:center;box-shadow:var(--sombra-forte);
+  animation:pulsar 2.4s infinite;
+}
+.whatsapp-flutuante svg{width:28px;height:28px;fill:#fff}
+@keyframes pulsar{
+  0%{box-shadow:0 0 0 0 rgba(37,211,102,.5)}
+  70%{box-shadow:0 0 0 14px rgba(37,211,102,0)}
+  100%{box-shadow:0 0 0 0 rgba(37,211,102,0)}
+}
+
+/* ============ BANNER PRINCIPAL (home) ============ */
+.banner{
+  position:relative;min-height:420px;display:flex;align-items:center;
+  background-size:cover;background-position:center;border-radius:0 0 28px 28px;overflow:hidden;
+}
+.banner::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(100deg,rgba(15,30,17,.82) 0%,rgba(15,30,17,.45) 55%,rgba(15,30,17,.15) 100%);
+}
+.banner__conteudo{position:relative;z-index:1;max-width:640px;padding:0 20px;margin:0 auto;width:100%;max-width:1240px}
+.banner__conteudo h1{color:#fff;font-size:clamp(1.9rem,4vw,3rem);font-weight:800;margin-bottom:14px;animation:surgir .6s ease both}
+.banner__conteudo p{color:#EAF3EA;font-size:1.05rem;max-width:480px;margin-bottom:26px;animation:surgir .6s .1s ease both}
+.banner__botoes{display:flex;gap:14px;flex-wrap:wrap;animation:surgir .6s .2s ease both}
+@keyframes surgir{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.botao{
+  display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:999px;
+  font-weight:700;font-size:.94rem;transition:transform var(--transicao),box-shadow var(--transicao);
+}
+.botao-primario{background:var(--cor-dourada);color:#241D00}
+.botao-primario:hover{transform:translateY(-3px);box-shadow:var(--sombra-forte)}
+.botao-secundario{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.5);backdrop-filter:blur(2px)}
+.botao-secundario:hover{background:rgba(255,255,255,.26)}
+
+/* ============ CATEGORIAS (tiras de pílulas) ============ */
+.categorias-tira{padding:26px 0 6px}
+.categorias-tira__lista{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px}
+.categoria-pilula{
+  flex-shrink:0;background:var(--cor-cartao);border:1px solid var(--cor-borda);
+  padding:10px 20px;border-radius:999px;font-weight:600;font-size:.86rem;
+  transition:var(--transicao);
+}
+.categoria-pilula:hover{background:var(--cor-primaria);color:#fff;border-color:var(--cor-primaria)}
+
+/* ============ SEÇÕES GERAIS ============ */
+.secao{padding:38px 0}
+.secao__cabecalho{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:20px}
+.secao__titulo{font-size:1.5rem;font-weight:700;position:relative;padding-left:16px}
+.secao__titulo::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:5px;border-radius:4px;background:var(--cor-dourada)}
+.secao__ver-tudo{font-weight:600;font-size:.88rem;color:var(--cor-primaria)}
+.secao__ver-tudo:hover{text-decoration:underline}
+
+/* ============ GRADE E CARDS DE PRODUTO ============ */
+.grade-produtos{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
+.card-produto{
+  background:var(--cor-cartao);border-radius:var(--raio);overflow:hidden;
+  border:1px solid var(--cor-borda);transition:transform var(--transicao),box-shadow var(--transicao);
+  display:flex;flex-direction:column;position:relative;
+}
+.card-produto:hover{transform:translateY(-5px);box-shadow:var(--sombra-forte)}
+.card-produto__imagem-caixa{position:relative;aspect-ratio:1/1;overflow:hidden;background:var(--cor-fundo)}
+.card-produto__imagem-caixa img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
+.card-produto:hover .card-produto__imagem-caixa img{transform:scale(1.07)}
+.selo{
+  position:absolute;top:10px;left:10px;padding:5px 11px;border-radius:999px;
+  font-size:.68rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#fff;z-index:2;
+}
+.selo-oferta{background:var(--cor-alerta)}
+.selo-novo{background:var(--cor-primaria)}
+.selo-mais-vendido{background:var(--cor-dourada);color:#241D00}
+.selo-economia{
+  position:absolute;top:10px;right:10px;background:var(--cor-texto);color:#fff;
+  border-radius:50%;width:46px;height:46px;display:grid;place-items:center;
+  font-size:.68rem;font-weight:800;line-height:1.05;text-align:center;z-index:2;
+}
+.card-produto__corpo{padding:14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.card-produto__titulo{font-size:.9rem;font-weight:600;min-height:2.6em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.card-produto__precos{margin-top:auto}
+.card-produto__preco-antigo{font-size:.78rem;color:var(--cor-preco-antigo);text-decoration:line-through}
+.card-produto__preco{font-size:1.18rem;font-weight:800;color:var(--cor-primaria-escura)}
+.card-produto__parcelas{font-size:.72rem;color:var(--cor-texto-suave)}
+.card-produto__botao{
+  margin-top:10px;background:var(--cor-primaria);color:#fff;text-align:center;
+  padding:10px;border-radius:var(--raio-pequeno);font-weight:700;font-size:.85rem;
+  transition:background var(--transicao);
+}
+.card-produto__botao:hover{background:var(--cor-primaria-escura)}
+.grade-vazia{color:var(--cor-texto-suave);font-size:.9rem;padding:20px 0}
+
+/* skeleton de carregamento (lazy) */
+.skeleton{background:linear-gradient(90deg,#eee 25%,#f6f6f6 37%,#eee 63%);background-size:400% 100%;animation:brilho 1.4s infinite}
+@keyframes brilho{0%{background-position:100% 0}100%{background-position:0 0}}
+
+/* ============ AVALIAÇÕES ============ */
+.avaliacoes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+.avaliacao-card{background:var(--cor-cartao);border:1px solid var(--cor-borda);border-radius:var(--raio);padding:18px}
+.avaliacao-card__estrelas{color:var(--cor-dourada);margin-bottom:8px;font-size:.9rem}
+.avaliacao-card__texto{font-size:.88rem;color:var(--cor-texto-suave);margin-bottom:10px}
+.avaliacao-card__autor{font-weight:700;font-size:.84rem}
+
+/* ============ BREADCRUMB ============ */
+.trilha{font-size:.82rem;color:var(--cor-texto-suave);padding:16px 0}
+.trilha a:hover{color:var(--cor-primaria)}
+.trilha span{margin:0 6px}
+
+/* ============ PÁGINA DE PRODUTO (postagem) ============ */
+.pagina-produto{background:var(--cor-cartao);border-radius:var(--raio);padding:28px;box-shadow:var(--sombra);margin-bottom:30px}
+.pagina-produto__topo{display:grid;grid-template-columns:1fr 1fr;gap:36px}
+@media(max-width:860px){.pagina-produto__topo{grid-template-columns:1fr}}
+
+/* Galeria */
+.galeria-principal{border-radius:var(--raio);overflow:hidden;border:1px solid var(--cor-borda);aspect-ratio:1/1;margin-bottom:12px}
+.galeria-principal img{width:100%;height:100%;object-fit:cover}
+.galeria-miniaturas{display:flex;gap:10px;overflow-x:auto}
+.galeria-miniaturas img{
+  width:70px;height:70px;object-fit:cover;border-radius:var(--raio-pequeno);
+  border:2px solid transparent;cursor:pointer;opacity:.7;transition:var(--transicao);flex-shrink:0;
+}
+.galeria-miniaturas img:hover{opacity:1}
+.galeria-miniaturas img.ativa{border-color:var(--cor-primaria);opacity:1}
+.produto-video{margin-top:16px;border-radius:var(--raio);overflow:hidden;aspect-ratio:16/9}
+.produto-video iframe,.produto-video video{width:100%;height:100%;border:0}
+
+/* Informações e preço */
+.produto-titulo{font-size:1.6rem;font-weight:700;margin-bottom:10px}
+.produto-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:.82rem;color:var(--cor-texto-suave);margin-bottom:16px}
+.caixa-preco{background:var(--cor-primaria-clara);border-radius:var(--raio);padding:18px;margin-bottom:18px}
+.caixa-preco__antigo{font-size:.9rem;color:var(--cor-preco-antigo);text-decoration:line-through}
+.caixa-preco__linha{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.caixa-preco__atual{font-size:2rem;font-weight:800;color:var(--cor-primaria-escura)}
+.caixa-preco__economia{background:var(--cor-dourada);color:#241D00;font-weight:800;font-size:.78rem;padding:5px 10px;border-radius:6px}
+.caixa-preco__parcelas{font-size:.86rem;color:var(--cor-texto-suave);margin-top:6px}
+.caixa-preco__estoque{margin-top:14px}
+.barra-estoque{height:8px;border-radius:4px;background:#DDE3DD;overflow:hidden;margin-top:6px}
+.barra-estoque__preenchimento{height:100%;background:var(--cor-alerta);border-radius:4px}
+.caixa-preco__estoque small{color:var(--cor-texto-suave)}
+
+.produto-botoes{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.botao-grande{padding:16px;border-radius:var(--raio-pequeno);font-weight:800;font-size:1rem;text-align:center;display:flex;align-items:center;justify-content:center;gap:10px}
+.botao-comprar{background:var(--cor-primaria);color:#fff;transition:background var(--transicao),transform var(--transicao)}
+.botao-comprar:hover{background:var(--cor-primaria-escura);transform:translateY(-2px)}
+.linha-botoes-secundarios{display:flex;gap:10px}
+.botao-linha{flex:1;padding:12px;border-radius:var(--raio-pequeno);border:1px solid var(--cor-borda);font-weight:600;font-size:.85rem;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px;transition:var(--transicao)}
+.botao-linha:hover{border-color:var(--cor-primaria);color:var(--cor-primaria)}
+.botao-linha--whatsapp{border-color:#25D366;color:#128C4A}
+.botao-linha--whatsapp:hover{background:#25D366;color:#fff}
+
+/* Corpo: descrição, benefícios, specs, FAQ (renderizados a partir do modelo-produto.html) */
+.produto-secao{margin-top:34px}
+.produto-secao h2{font-size:1.25rem;margin-bottom:14px;padding-left:14px;border-left:4px solid var(--cor-dourada)}
+.produto-descricao{color:var(--cor-texto);font-size:.96rem}
+.lista-beneficios li{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;font-size:.92rem}
+.lista-beneficios li::before{content:'✓';flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--cor-primaria);color:#fff;display:grid;place-items:center;font-size:.72rem;font-weight:800}
+.tabela-especificacoes{width:100%;border-collapse:collapse;font-size:.9rem}
+.tabela-especificacoes tr:nth-child(odd){background:var(--cor-fundo)}
+.tabela-especificacoes td{padding:11px 14px;border-bottom:1px solid var(--cor-borda)}
+.tabela-especificacoes td:first-child{font-weight:600;width:40%;color:var(--cor-texto-suave)}
+
+.faq-item{border-bottom:1px solid var(--cor-borda)}
+.faq-pergunta{width:100%;text-align:left;padding:16px 4px;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:.94rem}
+.faq-pergunta::after{content:'+';font-size:1.3rem;color:var(--cor-primaria);transition:transform var(--transicao)}
+.faq-item.aberto .faq-pergunta::after{transform:rotate(45deg)}
+.faq-resposta{max-height:0;overflow:hidden;transition:max-height .3s ease;font-size:.9rem;color:var(--cor-texto-suave)}
+.faq-item.aberto .faq-resposta{max-height:400px;padding-bottom:16px}
+
+.relacionados{margin-top:10px}
+
+/* Comentários */
+#comentarios-produto{background:var(--cor-cartao);border-radius:var(--raio);padding:24px;box-shadow:var(--sombra)}
+
+/* ============ RODAPÉ ============ */
+.rodape{background:#12251A;color:#D8E4DA;margin-top:50px;padding:50px 0 20px}
+.rodape__grade{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:30px;margin-bottom:36px}
+@media(max-width:760px){.rodape__grade{grid-template-columns:1fr 1fr}}
+.rodape__marca{font-family:var(--fonte-titulo);font-weight:700;font-size:1.2rem;color:#fff;margin-bottom:10px}
+.rodape__texto{font-size:.86rem;color:#A9BBAC}
+.rodape h4{font-size:.9rem;color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spacing:.04em}
+.rodape ul li{margin-bottom:9px;font-size:.86rem}
+.rodape ul li a:hover{color:var(--cor-dourada)}
+.rodape__redes{display:flex;gap:10px;margin-top:14px}
+.rodape__redes a{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.08);display:grid;place-items:center;transition:var(--transicao)}
+.rodape__redes a:hover{background:var(--cor-dourada);color:#12251A}
+.rodape__redes svg{width:17px;height:17px;fill:currentColor}
+.rodape__base{border-top:1px solid rgba(255,255,255,.1);padding-top:18px;font-size:.78rem;color:#8DA091;text-align:center}
+
+/* ============ PAGINAÇÃO ============ */
+.paginacao{display:flex;justify-content:center;gap:10px;margin:30px 0}
+.paginacao a{padding:10px 18px;border-radius:999px;background:var(--cor-cartao);border:1px solid var(--cor-borda);font-weight:600;font-size:.86rem;transition:var(--transicao)}
+.paginacao a:hover{background:var(--cor-primaria);color:#fff;border-color:var(--cor-primaria)}
+
+/* ============ RESPONSIVO ============ */
+@media(max-width:900px){
+  .cabecalho__menu,.cabecalho__busca{display:none}
+  .cabecalho__menu-mobile-botao{display:block}
+  .cabecalho__menu.aberto{
+    display:flex;flex-direction:column;position:absolute;top:100%;left:0;right:0;
+    background:#fff;padding:16px 20px;border-bottom:1px solid var(--cor-borda);gap:14px;
+  }
+}
+@media(max-width:600px){
+  .rodape__grade{grid-template-columns:1fr}
+  .banner{min-height:340px}
+}
+      ]]></b:skin>
+</head>
+<body>
+
+<!-- ==================================================================
+     CONFIGURAÇÕES
+     Altere os valores abaixo para editar nome da loja, logo, redes
+     sociais, WhatsApp e categorias exibidas no menu e no rodapé.
+     ================================================================== -->
+<script>
+  var CONFIG_LOJA = {
+    nomeLoja: &quot;Loja Verde&quot;,
+    logoUrl: &quot;https://via.placeholder.com/84x84.png?text=Logo&quot;,
+    whatsappNumero: &quot;5585999999999&quot;,          // DDI+DDD+número, só dígitos
+    whatsappMensagemPadrao: &quot;Olá! Vim pelo site e quero saber mais sobre um produto.&quot;,
+    instagramUrl: &quot;https://instagram.com/sualoja&quot;,
+    facebookUrl: &quot;https://facebook.com/sualoja&quot;,
+    tiktokUrl: &quot;https://tiktok.com/@sualoja&quot;,
+    youtubeUrl: &quot;https://youtube.com/@sualoja&quot;,
+    // rótulos (labels) do Blogger usados para montar as vitrines da home
+    labelDestaques: &quot;destaque&quot;,
+    labelLancamentos: &quot;lancamento&quot;,
+    labelMaisVendidos: &quot;mais-vendido&quot;,
+    labelPromocoes: &quot;promocao&quot;,
+    // categorias exibidas na tira de categorias e no rodapé
+    categorias: [
+      { nome: &quot;Eletrônicos&quot;, label: &quot;eletronicos&quot; },
+      { nome: &quot;Casa&quot;, label: &quot;casa&quot; },
+      { nome: &quot;Moda&quot;, label: &quot;moda&quot; },
+      { nome: &quot;Beleza&quot;, label: &quot;beleza&quot; },
+      { nome: &quot;Fitness&quot;, label: &quot;fitness&quot; }
+    ]
+  };
+</script>
+
+<!-- Botão flutuante do WhatsApp -->
+<a class="whatsapp-flutuante" href="#" id="whatsapp-flutuante" target="_blank" rel="nofollow" aria-label="Falar no WhatsApp">
+  <svg viewBox="0 0 32 32"><path d="M16 3C9 3 3.3 8.7 3.3 15.7c0 2.6.7 5 1.9 7.1L3 29l6.4-2.1c2 .9 4.2 1.5 6.6 1.5 7 0 12.7-5.7 12.7-12.7C28.7 8.7 23 3 16 3zm0 23.1c-2.1 0-4.1-.6-5.8-1.6l-.4-.2-4.1 1.3 1.3-4-.3-.4c-1.1-1.8-1.7-3.8-1.7-6 0-6.1 5-11.1 11.1-11.1s11.1 5 11.1 11.1S22.1 26.1 16 26.1zm6-8.2c-.3-.2-1.9-1-2.2-1.1-.3-.1-.5-.2-.8.2-.2.3-.9 1.1-1.1 1.3-.2.2-.4.3-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-2-1.8-2.3-.2-.3 0-.5.1-.6.1-.1.3-.4.5-.6.2-.2.2-.3.3-.6.1-.2 0-.5 0-.6-.1-.2-.8-1.9-1.1-2.6-.3-.7-.6-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.3-1.2 1.2-1.2 2.9s1.2 3.4 1.4 3.6c.2.2 2.3 3.6 5.7 4.9.8.3 1.4.5 1.9.7.8.2 1.5.2 2 .1.6-.1 1.9-.8 2.2-1.5.3-.7.3-1.4.2-1.5-.1-.1-.3-.2-.6-.4z"/></svg>
+</a>
+
+<!-- ==================================================================
+     CABEÇALHO
+     ================================================================== -->
+<header class="cabecalho" id="cabecalho">
+  <div class="cabecalho__linha">
+    <a class="cabecalho__marca" expr:href='data:blog.homepageUrl'>
+      <img class="cabecalho__logo" id="logo-loja" alt="Logo da loja" src=""/>
+      <span class="cabecalho__nome" id="nome-loja"></span>
+    </a>
+
+    <nav class="cabecalho__menu" id="menu-principal" aria-label="Menu principal">
+      <a expr:href='data:blog.homepageUrl'>Home</a>
+      <a href="/search/label/produtos">Produtos</a>
+      <a href="/search/label/promocao">Promoções</a>
+      <a href="#categorias">Categorias</a>
+      <a href="#rodape-contato">Contato</a>
+    </nav>
+
+    <b:section id='busca-cabecalho' class='cabecalho__busca-secao' maxwidgets='1' showaddelement='no'>
+      <b:widget id='BlogSearch1' locked='false' title='Buscar' type='BlogSearch'>
+        <b:widget-settings/>
+        <b:includable id='main'>
+          <form action="/search" class="cabecalho__busca" method="get" role="search">
+            <input aria-label="Buscar produtos" name="q" placeholder="Buscar produtos..." type="text"/>
+            <button aria-label="Buscar" type="submit">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
+            </button>
+          </form>
+        </b:includable>
+      </b:widget>
+    </b:section>
+
+    <div class="cabecalho__acoes">
+      <a class="botao-whatsapp-topo" href="#" id="whatsapp-topo" target="_blank" rel="nofollow">
+        <svg viewBox="0 0 32 32" width="16" height="16"><path fill="#fff" d="M16 3C9 3 3.3 8.7 3.3 15.7c0 2.6.7 5 1.9 7.1L3 29l6.4-2.1c2 .9 4.2 1.5 6.6 1.5 7 0 12.7-5.7 12.7-12.7C28.7 8.7 23 3 16 3z"/></svg>
+        WhatsApp
+      </a>
+      <button aria-controls="menu-principal" aria-expanded="false" class="cabecalho__menu-mobile-botao" id="botao-menu-mobile" aria-label="Abrir menu">
+        <span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ==================================================================
+     BANNER PRINCIPAL — aparece só na home
+     ================================================================== -->
+<b:if cond='data:blog.pageType == &quot;index&quot; and data:blog.url == data:blog.homepageUrl'>
+  <b:section id='banner' class='banner-secao' maxwidgets='1' showaddelement='no'>
+    <b:widget id='HTML1' locked='false' title='Banner' type='HTML'>
+      <b:widget-settings>
+        <b:widget-setting name='content'><![CDATA[]]></b:widget-setting>
+      </b:widget-settings>
+      <b:includable id='main'>
+        <section class="banner" style="background-image:url('https://images.unsplash.com/photo-1607083206968-13611e3d76db?w=1600');">
+          <div class="banner__conteudo">
+            <h1>Ofertas selecionadas para você</h1>
+            <p>Os melhores produtos, com preço justo e entrega rápida. Curadoria feita à mão, todos os dias.</p>
+            <div class="banner__botoes">
+              <a class="botao botao-primario" href="/search/label/promocao">Ver Ofertas</a>
+              <a class="botao botao-secundario" href="#" id="whatsapp-banner" rel="nofollow" target="_blank">Falar no WhatsApp</a>
+            </div>
+          </div>
+        </section>
+      </b:includable>
+    </b:widget>
+  </b:section>
+</b:if>
+
+<!-- ==================================================================
+     SEÇÕES DA HOME (destaques, lançamentos, mais vendidos, promoções)
+     Preenchidas via JavaScript a partir dos feeds do Blogger por label,
+     assim cada vitrine mostra só os produtos daquele rótulo.
+     ================================================================== -->
+<b:if cond='data:blog.pageType == &quot;index&quot; and data:blog.url == data:blog.homepageUrl'>
+  <main class="wrap">
+
+    <section class="categorias-tira" id="categorias">
+      <ul class="categorias-tira__lista" id="lista-categorias"></ul>
+    </section>
+
+    <section class="secao">
+      <div class="secao__cabecalho">
+        <h2 class="secao__titulo">Produtos em Destaque</h2>
+        <a class="secao__ver-tudo" expr:href='&quot;/search/label/&quot; + data:blog.searchLabel'>Ver tudo</a>
+      </div>
+      <div class="grade-produtos" data-vitrine="destaques"></div>
+    </section>
+
+    <section class="secao">
+      <div class="secao__cabecalho">
+        <h2 class="secao__titulo">Lançamentos</h2>
+      </div>
+      <div class="grade-produtos" data-vitrine="lancamentos"></div>
+    </section>
+
+    <section class="secao">
+      <div class="secao__cabecalho">
+        <h2 class="secao__titulo">Mais Vendidos</h2>
+      </div>
+      <div class="grade-produtos" data-vitrine="mais-vendidos"></div>
+    </section>
+
+    <section class="secao">
+      <div class="secao__cabecalho">
+        <h2 class="secao__titulo">Promoções</h2>
+      </div>
+      <div class="grade-produtos" data-vitrine="promocoes"></div>
+    </section>
+
+    <section class="secao">
+      <div class="secao__cabecalho">
+        <h2 class="secao__titulo">Avaliações de Clientes</h2>
+      </div>
+      <div class="avaliacoes">
+        <article class="avaliacao-card">
+          <div class="avaliacao-card__estrelas">★★★★★</div>
+          <p class="avaliacao-card__texto">Comprei e chegou rapidinho, produto igual ao anunciado. Recomendo!</p>
+          <p class="avaliacao-card__autor">— Mariana S.</p>
+        </article>
+        <article class="avaliacao-card">
+          <div class="avaliacao-card__estrelas">★★★★★</div>
+          <p class="avaliacao-card__texto">Atendimento pelo WhatsApp foi ótimo, tirou todas as minhas dúvidas antes da compra.</p>
+          <p class="avaliacao-card__autor">— Carlos E.</p>
+        </article>
+        <article class="avaliacao-card">
+          <div class="avaliacao-card__estrelas">★★★★☆</div>
+          <p class="avaliacao-card__texto">Boa qualidade pelo preço. Só demorou um pouco mais que o esperado.</p>
+          <p class="avaliacao-card__autor">— Fernanda L.</p>
+        </article>
+      </div>
+    </section>
+
+  </main>
+</b:if>
+
+<!-- ==================================================================
+     ÚLTIMAS POSTAGENS / PÁGINA DE PRODUTO
+     Widget nativo do Blog — garante que o Google indexe os links de
+     todas as postagens (bom para SEO) e renderiza a página de produto
+     completa quando o visitante abre uma postagem.
+     ================================================================== -->
+<b:section id='main' class='main-secao' showaddelement='no'>
+  <b:widget id='Blog1' locked='true' title='Blog' type='Blog'>
+    <b:includable id='main' var='top'>
+      <div class="wrap">
+        <b:if cond='data:blog.pageType == &quot;index&quot; and data:blog.url == data:blog.homepageUrl'>
+          <section class="secao">
+            <div class="secao__cabecalho">
+              <h2 class="secao__titulo">Últimas Postagens</h2>
+            </div>
+            <div class="grade-produtos">
+              <b:loop values='data:posts' var='post'>
+                <b:include data='post' name='cartaoUltimaPostagem'/>
+              </b:loop>
+            </div>
+          </section>
+        </b:if>
+
+        <b:if cond='data:blog.pageType == &quot;item&quot;'>
+          <b:loop values='data:posts' var='post'>
+            <b:include data='post' name='paginaProduto'/>
+          </b:loop>
+        </b:if>
+
+        <b:if cond='data:blog.pageType in {&quot;archive&quot;,&quot;search&quot;} and data:blog.url != data:blog.homepageUrl'>
+          <nav class="trilha">
+            <a expr:href='data:blog.homepageUrl'>Home</a><span>/</span><data:blog.pageName/>
+          </nav>
+          <section class="secao">
+            <div class="grade-produtos">
+              <b:loop values='data:posts' var='post'>
+                <b:include data='post' name='cartaoUltimaPostagem'/>
+              </b:loop>
+              <b:if cond='data:posts.size == 0'>
+                <p class="grade-vazia">Nenhum produto encontrado nesta categoria.</p>
+              </b:if>
+            </div>
+          </section>
+        </b:if>
+
+        <b:include data='top' name='paginacao'/>
+      </div>
+    </b:includable>
+
+    <!-- Card usado nas listagens (últimas postagens, categorias, busca) -->
+    <b:includable id='cartaoUltimaPostagem' var='post'>
+      <article class="card-produto">
+        <a class="card-produto__imagem-caixa" expr:href='data:post.url'>
+          <b:if cond='data:post.featuredImage'>
+            <img expr:alt='data:post.title' loading="lazy" expr:src='resizeImage(data:post.featuredImage, 400, "1:1")'/>
+          <b:else/>
+            <img alt="Produto" loading="lazy" src="https://via.placeholder.com/400x400.png?text=Produto"/>
+          </b:if>
+        </a>
+        <div class="card-produto__corpo">
+          <a class="card-produto__titulo" expr:href='data:post.url'><data:post.title/></a>
+          <a class="card-produto__botao" expr:href='data:post.url'>Ver produto</a>
+        </div>
+      </article>
+    </b:includable>
+
+    <!-- Paginação nativa do Blogger -->
+    <b:includable id='paginacao' var='top'>
+      <b:if cond='data:top.olderPageUrl or data:top.newerPageUrl'>
+        <nav class="paginacao">
+          <b:if cond='data:top.newerPageUrl'><a expr:href='data:top.newerPageUrl'>&#8592; Mais recentes</a></b:if>
+          <b:if cond='data:top.olderPageUrl'><a expr:href='data:top.olderPageUrl'>Mais antigas &#8594;</a></b:if>
+        </nav>
+      </b:if>
+    </b:includable>
+
+    <!-- ============================================================
+         PÁGINA DE PRODUTO COMPLETA
+         O corpo da postagem (data:post.body) deve ser criado a partir
+         do arquivo modelo-produto.html: é ele que traz a galeria,
+         preço, benefícios, especificações e FAQ.
+         ============================================================ -->
+    <b:includable id='paginaProduto' var='post'>
+      <nav class="trilha" itemscope="itemscope" itemtype="https://schema.org/BreadcrumbList">
+        <a expr:href='data:blog.homepageUrl'>Home</a><span>/</span>
+        <b:if cond='data:post.labels'>
+          <a expr:href='data:post.labels.first.url'><data:post.labels.first.name/></a><span>/</span>
+        </b:if>
+        <data:post.title/>
+      </nav>
+
+      <article class="pagina-produto" data-post-title.data-post-url="">
+        <h1 class="produto-titulo"><data:post.title/></h1>
+        <div class="produto-meta">
+          <span>Publicado em <data:post.date/></span>
+          <b:if cond='data:post.labels'>
+            <span>Categoria:
+              <b:loop values='data:post.labels' var='label'>
+                <a expr:href='data:label.url'><data:label.name/></a><b:if cond='not data:label.isLast'>, </b:if>
+              </b:loop>
+            </span>
+          </b:if>
+        </div>
+
+        <!-- O conteúdo abaixo vem inteiramente do corpo da postagem
+             (colado a partir do modelo-produto.html) -->
+        <div class="produto-corpo" id="corpo-produto-<data:post.id/>">
+          <data:post.body/>
+        </div>
+
+        <div class="linha-botoes-secundarios" style="margin-top:22px">
+          <button class="botao-linha" id="botao-compartilhar" type="button">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.6" x2="15.4" y2="6.4"/><line x1="8.6" y1="13.4" x2="15.4" y2="17.6"/></svg>
+            Compartilhar
+          </button>
+          <a class="botao-linha botao-linha--whatsapp" href="#" id="whatsapp-produto" rel="nofollow" target="_blank">Dúvidas? Fale no WhatsApp</a>
+        </div>
+      </article>
+
+      <!-- Produtos relacionados: primeira categoria da postagem atual -->
+      <b:if cond='data:post.labels'>
+        <section class="secao relacionados">
+          <div class="secao__cabecalho">
+            <h2 class="secao__titulo">Produtos Relacionados</h2>
+          </div>
+          <div class="grade-produtos" data-vitrine-relacionados expr:data-label='data:post.labels.first.name' expr:data-excluir='data:post.url'></div>
+        </section>
+      </b:if>
+
+      <section class="secao" id="comentarios-produto">
+        <div class="secao__cabecalho">
+          <h2 class="secao__titulo">Comentários</h2>
+        </div>
+        <b:include data='post' name='comentarios'/>
+      </section>
+
+      <!-- Schema.org Product — preenchido via JS lendo os atributos
+           data-* da caixa de preço presente no modelo-produto.html -->
+      <script expr:data-post-url='data:post.url' expr:data-post-title='data:post.title' expr:data-post-image='data:post.featuredImage' id="dados-produto-atual" type="application/json"></script>
+    </b:includable>
+
+  </b:widget>
+</b:section>
+
+<!-- ==================================================================
+     RODAPÉ
+     ================================================================== -->
+<footer class="rodape" id="rodape-contato">
+  <div class="wrap">
+    <div class="rodape__grade">
+      <div>
+        <div class="rodape__marca" id="rodape-nome-loja"></div>
+        <p class="rodape__texto">Curadoria de produtos com ótimo custo-benefício, entrega rápida e atendimento direto pelo WhatsApp.</p>
+        <div class="rodape__redes" id="rodape-redes"></div>
+      </div>
+      <div>
+        <h4>Institucional</h4>
+        <ul>
+          <li><a expr:href='data:blog.homepageUrl'>Home</a></li>
+          <li><a href="/search/label/produtos">Produtos</a></li>
+          <li><a href="/search/label/promocao">Promoções</a></li>
+          <li><a href="#rodape-contato">Contato</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Categorias</h4>
+        <ul id="rodape-categorias"></ul>
+      </div>
+      <div>
+        <h4>Fale conosco</h4>
+        <ul>
+          <li><a href="#" id="whatsapp-rodape" rel="nofollow" target="_blank">WhatsApp</a></li>
+          <li><a href="#" id="instagram-rodape" rel="nofollow" target="_blank">Instagram</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="rodape__base">
+      <span id="rodape-nome-loja-copyright"></span> © <span id="ano-atual"></span>. Este site participa de programas de afiliados; ao comprar por nossos links, podemos receber uma comissão sem custo adicional para você.
+    </div>
+  </div>
+</footer>
+
+<b:section id='rodape-widgets' class='oculta' maxwidgets='1' showaddelement='no'/>
+
+<!-- ==================================================================
+     JAVASCRIPT — toda a interatividade do tema
+     ================================================================== -->
+<script><![CDATA[
+(function(){
+  'use strict';
+
+  /* -------- aplica CONFIGURAÇÕES no cabeçalho e rodapé -------- */
+  function aplicarConfig(){
+    var c = window.CONFIG_LOJA;
+    if(!c) return;
+    var logo = document.getElementById('logo-loja'); if(logo) logo.src = c.logoUrl;
+    var nomes = document.querySelectorAll('#nome-loja, #rodape-nome-loja, #rodape-nome-loja-copyright');
+    nomes.forEach(function(el){ el.textContent = c.nomeLoja; });
+
+    var anoEl = document.getElementById('ano-atual');
+    if(anoEl) anoEl.textContent = new Date().getFullYear();
+
+    // links de WhatsApp (topo, banner, produto, flutuante, rodapé)
+    var linkWhats = 'https://wa.me/' + c.whatsappNumero + '?text=' + encodeURIComponent(c.whatsappMensagemPadrao);
+    ['whatsapp-topo','whatsapp-banner','whatsapp-produto','whatsapp-flutuante','whatsapp-rodape'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(el) el.href = linkWhats;
+    });
+    var insta = document.getElementById('instagram-rodape'); if(insta) insta.href = c.instagramUrl;
+
+    // redes sociais no rodapé (ícones)
+    var redes = document.getElementById('rodape-redes');
+    if(redes){
+      var icones = {
+        instagramUrl: '<svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.9.07 1.2.06 2 .24 2.7.5.7.28 1.3.65 1.9 1.25.6.6 1 1.2 1.24 1.9.27.7.45 1.5.5 2.7.07 1.3.07 1.7.07 4.9s0 3.6-.07 4.9c-.06 1.2-.24 2-.5 2.7a5 5 0 0 1-1.24 1.9 5 5 0 0 1-1.9 1.24c-.7.27-1.5.45-2.7.5-1.3.07-1.7.07-4.9.07s-3.6 0-4.9-.07c-1.2-.06-2-.24-2.7-.5a5 5 0 0 1-1.9-1.24 5 5 0 0 1-1.24-1.9c-.27-.7-.45-1.5-.5-2.7C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.9c.06-1.2.24-2 .5-2.7.28-.7.65-1.3 1.25-1.9A5 5 0 0 1 5.9 1.27c.7-.27 1.5-.45 2.7-.5C9.9 2.2 10.3 2.2 12 2.2zm0 1.8c-3.15 0-3.52 0-4.76.07-1 .05-1.55.22-1.9.36-.48.19-.82.4-1.18.76-.36.36-.58.7-.76 1.18-.14.36-.3.9-.36 1.9C3 9.3 3 9.68 3 12s0 3.52.07 4.76c.05 1 .22 1.55.36 1.9.19.48.4.82.76 1.18.36.36.7.58 1.18.76.36.14.9.3 1.9.36 1.24.06 1.6.07 4.76.07s3.52 0 4.76-.07c1-.06 1.55-.22 1.9-.36.48-.19.82-.4 1.18-.76.36-.36.58-.7.76-1.18.14-.36.3-.9.36-1.9.06-1.24.07-1.6.07-4.76s0-3.52-.07-4.76c-.06-1-.22-1.55-.36-1.9-.19-.48-.4-.82-.76-1.18a3.2 3.2 0 0 0-1.18-.76c-.36-.14-.9-.3-1.9-.36C15.52 4 15.15 4 12 4zm0 3.4a4.6 4.6 0 1 1 0 9.2 4.6 4.6 0 0 1 0-9.2zm0 1.8a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6zm4.85-2a1.08 1.08 0 1 1 0 2.16 1.08 1.08 0 0 1 0-2.16z"/></svg>',
+        facebookUrl: '<svg viewBox="0 0 24 24"><path d="M13.5 21v-8h2.7l.4-3.3h-3.1V7.6c0-.95.26-1.6 1.63-1.6h1.74V3.14C15.98 3.1 15 3 13.83 3 11.4 3 9.75 4.49 9.75 7.3v2.4H7v3.3h2.75V21h3.75z"/></svg>',
+        tiktokUrl: '<svg viewBox="0 0 24 24"><path d="M14.5 2h2.9c.2 1.6 1.2 3 2.6 3.7v2.9c-1.5-.1-2.9-.6-4-1.5v7.1c0 3.4-2.7 6.1-6.1 6.1S3.8 17.6 3.8 14.2s2.7-6.1 6.1-6.1c.4 0 .8 0 1.2.1v2.9c-.4-.1-.8-.2-1.2-.2-1.7 0-3.1 1.4-3.1 3.1s1.4 3.1 3.1 3.1 3.1-1.4 3.1-3.1V2z"/></svg>',
+        youtubeUrl: '<svg viewBox="0 0 24 24"><path d="M21.6 7.2s-.2-1.5-.8-2.2c-.8-.8-1.7-.8-2.1-.9C15.9 4 12 4 12 4s-3.9 0-6.7.1c-.4 0-1.3.1-2.1.9-.6.7-.8 2.2-.8 2.2S2.2 9 2.2 10.7v1.6c0 1.7.2 3.5.2 3.5s.2 1.5.8 2.2c.8.8 1.9.8 2.4.9 1.7.2 7.4.2 7.4.2s3.9 0 6.7-.2c.4 0 1.3-.1 2.1-.9.6-.7.8-2.2.8-2.2s.2-1.7.2-3.5v-1.6c0-1.7-.2-3.5-.2-3.5zM10 14.6V8.9l5.2 2.9-5.2 2.8z"/></svg>'
+      };
+      Object.keys(icones).forEach(function(chave){
+        if(c[chave]){
+          var a = document.createElement('a');
+          a.href = c[chave]; a.target = '_blank'; a.rel = 'nofollow';
+          a.innerHTML = icones[chave];
+          redes.appendChild(a);
+        }
+      });
+    }
+
+    // categorias: tira da home + rodapé
+    var listaCategorias = document.getElementById('lista-categorias');
+    var rodapeCategorias = document.getElementById('rodape-categorias');
+    (c.categorias || []).forEach(function(cat){
+      if(listaCategorias){
+        var li = document.createElement('li');
+        li.innerHTML = '<a class="categoria-pilula" href="/search/label/' + encodeURIComponent(cat.label) + '">' + cat.nome + '</a>';
+        listaCategorias.appendChild(li);
+      }
+      if(rodapeCategorias){
+        var li2 = document.createElement('li');
+        li2.innerHTML = '<a href="/search/label/' + encodeURIComponent(cat.label) + '">' + cat.nome + '</a>';
+        rodapeCategorias.appendChild(li2);
+      }
+    });
+  }
+
+  /* -------- cabeçalho: sombra ao rolar + menu mobile -------- */
+  function comportamentoCabecalho(){
+    var cabecalho = document.getElementById('cabecalho');
+    window.addEventListener('scroll', function(){
+      if(!cabecalho) return;
+      cabecalho.classList.toggle('com-sombra', window.scrollY > 6);
+    });
+    var botaoMenu = document.getElementById('botao-menu-mobile');
+    var menu = document.getElementById('menu-principal');
+    if(botaoMenu && menu){
+      botaoMenu.addEventListener('click', function(){
+        menu.classList.toggle('aberto');
+        var aberto = menu.classList.contains('aberto');
+        botaoMenu.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+      });
+    }
+  }
+
+  /* -------- monta um card de produto a partir de uma entrada do feed -------- */
+  function montarCardHTML(entrada){
+    var titulo = entrada.title.$t;
+    var link = '#';
+    (entrada.link || []).forEach(function(l){ if(l.rel === 'alternate') link = l.href; });
+    var imagem = entrada.media$thumbnail ? entrada.media$thumbnail.url.replace(/\/s72-c\//, '/s400-c/') : 'https://via.placeholder.com/400x400.png?text=Produto';
+    return '' +
+      '<article class="card-produto">' +
+        '<a class="card-produto__imagem-caixa" href="' + link + '">' +
+          '<img src="' + imagem + '" alt="' + titulo.replace(/"/g,'') + '" loading="lazy"/>' +
+        '</a>' +
+        '<div class="card-produto__corpo">' +
+          '<a class="card-produto__titulo" href="' + link + '">' + titulo + '</a>' +
+          '<a class="card-produto__botao" href="' + link + '">Ver produto</a>' +
+        '</div>' +
+      '</article>';
+  }
+
+  /* -------- busca postagens de um rótulo (label) via feed JSON do Blogger -------- */
+  function carregarVitrinePorLabel(seletorContainer, label, excluirUrl, maxResultados){
+    var container = document.querySelector(seletorContainer);
+    if(!container) return;
+    container.innerHTML = '<div class="skeleton" style="grid-column:1/-1;height:120px;border-radius:14px"></div>';
+    var url = '/feeds/posts/summary/-/' + encodeURIComponent(label) + '?alt=json&max-results=' + (maxResultados || 8);
+    fetch(url).then(function(r){ return r.json(); }).then(function(dados){
+      var entradas = (dados.feed && dados.feed.entry) || [];
+      if(excluirUrl){
+        entradas = entradas.filter(function(e){
+          var link = '#';
+          (e.link || []).forEach(function(l){ if(l.rel === 'alternate') link = l.href; });
+          return link !== excluirUrl;
+        });
+      }
+      if(entradas.length === 0){
+        container.innerHTML = '<p class="grade-vazia">Em breve, novos produtos nesta seção.</p>';
+        return;
+      }
+      container.innerHTML = entradas.map(montarCardHTML).join('');
+    }).catch(function(){
+      container.innerHTML = '<p class="grade-vazia">Não foi possível carregar os produtos agora.</p>';
+    });
+  }
+
+  function carregarVitrinesDaHome(){
+    var c = window.CONFIG_LOJA || {};
+    carregarVitrinePorLabel('[data-vitrine="destaques"]', c.labelDestaques);
+    carregarVitrinePorLabel('[data-vitrine="lancamentos"]', c.labelLancamentos);
+    carregarVitrinePorLabel('[data-vitrine="mais-vendidos"]', c.labelMaisVendidos);
+    carregarVitrinePorLabel('[data-vitrine="promocoes"]', c.labelPromocoes);
+  }
+
+  function carregarRelacionados(){
+    var container = document.querySelector('[data-vitrine-relacionados]');
+    if(!container) return;
+    var label = container.getAttribute('data-label');
+    var excluir = container.getAttribute('data-excluir');
+    carregarVitrinePorLabel('[data-vitrine-relacionados]', label, excluir, 4);
+  }
+
+  /* -------- acordeão de FAQ (delegação de evento) -------- */
+  function comportamentoFAQ(){
+    document.addEventListener('click', function(ev){
+      var pergunta = ev.target.closest('.faq-pergunta');
+      if(!pergunta) return;
+      pergunta.closest('.faq-item').classList.toggle('aberto');
+    });
+  }
+
+  /* -------- galeria: clique na miniatura troca a imagem principal -------- */
+  function comportamentoGaleria(){
+    document.addEventListener('click', function(ev){
+      var miniatura = ev.target.closest('.galeria-miniaturas img');
+      if(!miniatura) return;
+      var galeria = miniatura.closest('.pagina-produto') || document;
+      var principal = galeria.querySelector('.galeria-principal img');
+      if(principal) principal.src = miniatura.src.replace(/\/s\d+-c\//, '/s800-c/') || miniatura.src;
+      miniatura.parentElement.querySelectorAll('img').forEach(function(im){ im.classList.remove('ativa'); });
+      miniatura.classList.add('ativa');
+    });
+  }
+
+  /* -------- botão compartilhar -------- */
+  function comportamentoCompartilhar(){
+    var botao = document.getElementById('botao-compartilhar');
+    if(!botao) return;
+    botao.addEventListener('click', function(){
+      var dados = { title: document.title, url: window.location.href };
+      if(navigator.share){
+        navigator.share(dados).catch(function(){});
+      } else {
+        navigator.clipboard.writeText(dados.url).then(function(){
+          botao.textContent = 'Link copiado!';
+          setTimeout(function(){ botao.innerHTML = 'Compartilhar'; }, 2000);
+        });
+      }
+    });
+  }
+
+  /* -------- Schema.org Product: lê a caixa de preço do modelo-produto.html -------- */
+  function injetarSchemaProduto(){
+    var caixa = document.querySelector('[data-schema-produto]');
+    if(!caixa) return;
+    var dados = {
+      '@context': 'https://schema.org/',
+      '@type': 'Product',
+      name: caixa.getAttribute('data-nome') || document.title,
+      image: caixa.getAttribute('data-imagem') || '',
+      description: caixa.getAttribute('data-descricao') || '',
+      offers: {
+        '@type': 'Offer',
+        priceCurrency: 'BRL',
+        price: caixa.getAttribute('data-preco') || '0',
+        availability: (caixa.getAttribute('data-estoque') === '0') ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock',
+        url: window.location.href
+      }
+    };
+    var script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.text = JSON.stringify(dados);
+    document.head.appendChild(script);
+  }
+
+  /* -------- inicialização -------- */
+  document.addEventListener('DOMContentLoaded', function(){
+    aplicarConfig();
+    comportamentoCabecalho();
+    comportamentoFAQ();
+    comportamentoGaleria();
+    comportamentoCompartilhar();
+    carregarVitrinesDaHome();
+    carregarRelacionados();
+    injetarSchemaProduto();
+  });
+})();
+]]></script>
+
+</body>
+</html>
